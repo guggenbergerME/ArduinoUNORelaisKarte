@@ -20,15 +20,12 @@
  * THE SOFTWARE.
  */
 
+#include <Arduino.h>
 #include <Ethernet.h>
 #include <PubSubClient.h> // mqtt
 #include "PCF8574.h" // Port Expander
 #include <SPI.h> // Seriell
 #include <Wire.h>
-
-/************************************************************************** Relais Belegung
-*/
-const int Relai_K1 = 2; // Relais-Pin am Arduino
 
 
 //************************************************************************** LAN Network definieren 
@@ -45,7 +42,8 @@ PubSubClient client(ethClient);
 //************************************************************************** Variablen
 int topic_init = 0; // Topic Variable zum einmaligen aufrufen
 
-
+//************************************************************************** Variablen Relais
+int Relais_K1 = 8; // Relais K1
 
 //************************************************************************** Funktionsprototypen
 void loop                       ();
@@ -84,7 +82,8 @@ void setup() {
   client.setCallback(callback);
 
 /////////////////////////////////////////////////////////////////////////// Port Relaisausgang deklaieren
-pinMode(Relai_K1, OUTPUT); // Relais Pins als Ausgang deklarieren
+pinMode(Relais_K1, OUTPUT); // Relais Pins als Ausgang deklarieren
+digitalWrite(Relais_K1, !LOW); //RELAIS aus
 
 }
 
@@ -99,7 +98,7 @@ Benötigte Variable
   {
     topic_init = 1;
     // Topic init
-    client.publish("Relais/001/K1", "online");
+    client.publish("Relais/Karte001/K1", "online");
       }
 }
 
@@ -107,9 +106,9 @@ Benötigte Variable
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Verbindung zum MQTT-Server aufbauen...");
-    if (client.connect("Relais001", "hitesh", "RO9UZ7wANCXzmy")) {
+    if (client.connect("RelaisKarte001", "hitesh", "RO9UZ7wANCXzmy")) {
       Serial.println("verbunden");
-      client.subscribe("Relais/001/K1");
+      client.subscribe("Relais/Karte001/K1");
     } else {
       Serial.print("Fehler, rc=");
       Serial.print(client.state());
@@ -135,101 +134,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(message);
 
 // -------------------------------------------------------- Topic Auswerten K0 gruen
-    if (String(topic) == "Meldungen/Warnleuchte001/gruen") {
+    if (String(topic) == "Relais/Karte001/K1") {
       if (message == "on") {
-          Serial.println("Relais K0 gruen -> AN");
-          pcf8574.digitalWrite(P0, !HIGH);
+          Serial.println("Relais K1 -> AN");
+          digitalWrite(Relais_K1, !HIGH); //RELAIS aus
       } 
       else if (message == "off") {
-          Serial.println("Relais K0 gruen -> AUS");
-          pcf8574.digitalWrite(P0, !LOW);
+          Serial.println("Relais K1 -> AUS");
+          digitalWrite(Relais_K1, !LOW); //RELAIS aus
       } 
       else { }} else { }
-
-// -------------------------------------------------------- Topic Auswerten K1 gelb
-    if (String(topic) == "Meldungen/Warnleuchte001/gelb") {
-      if (message == "on") {
-          Serial.println("Relais K1 gelb -> AN");
-          pcf8574.digitalWrite(P1, !HIGH);
-      } 
-      else if (message == "off") {
-          Serial.println("Relais K1 gelb -> AUS");
-          pcf8574.digitalWrite(P1, !LOW);
-      } 
-      else { }} else { }
-
-// -------------------------------------------------------- Topic Auswerten K2 rot
-    if (String(topic) == "Meldungen/Warnleuchte001/rot") {
-      if (message == "on") {
-          Serial.println("Relais K2 rot -> AN");
-          pcf8574.digitalWrite(P2, !HIGH);
-      } 
-      else if (message == "off") {
-          Serial.println("Relais K2 rot-> AUS");
-          pcf8574.digitalWrite(P2, !LOW);
-      } 
-      else { }} else { }
-
-
-// -------------------------------------------------------- Topic Auswerten K3 blau
-    if (String(topic) == "Meldungen/Warnleuchte001/blau") {
-      if (message == "on") {
-          Serial.println("Relais K3 blau -> AN");
-          pcf8574.digitalWrite(P3, !HIGH);
-      } 
-      else if (message == "off") {
-          Serial.println("Relais K3 blau -> AUS");
-          pcf8574.digitalWrite(P3, !LOW);
-      } 
-      else { }} else { }
-
-// -------------------------------------------------------- Topic Auswerten K4 x1
-    if (String(topic) == "Meldungen/Warnleuchte001/x1") {
-      if (message == "on") {
-          Serial.println("Relais K4 x1 -> AN");
-          pcf8574.digitalWrite(P4, !HIGH);
-      } 
-      else if (message == "off") {
-          Serial.println("Relais K4 x1 -> AUS");
-          pcf8574.digitalWrite(P4, !LOW);
-      } 
-      else { }} else { }
-
-// -------------------------------------------------------- Topic Auswerten K5 x2
-    if (String(topic) == "Meldungen/Warnleuchte001/x2") {
-      if (message == "on") {
-          Serial.println("Relais K5 x2 -> AN");
-          pcf8574.digitalWrite(P5, !HIGH);
-      } 
-      else if (message == "off") {
-          Serial.println("Relais K5 x2 -> AUS");
-          pcf8574.digitalWrite(P5, !LOW);
-      } 
-      else { }} else { }
-
-// -------------------------------------------------------- Topic Auswerten K6 x3
-    if (String(topic) == "Meldungen/Warnleuchte001/x3") {
-      if (message == "on") {
-          Serial.println("Relais K6 x3 -> AN");
-          pcf8574.digitalWrite(P6, !HIGH);
-      } 
-      else if (message == "off") {
-          Serial.println("Relais K6 x3 -> AUS");
-          pcf8574.digitalWrite(P6, !LOW);
-      } 
-      else { }} else { }
-
-// -------------------------------------------------------- Topic Auswerten K7 hupe
-    if (String(topic) == "Meldungen/Warnleuchte001/hupe") {
-      if (message == "on") {
-          Serial.println("Relais K7 hupe -> AN");
-          pcf8574.digitalWrite(P7, !HIGH);
-      } 
-      else if (message == "off") {
-          Serial.println("Relais K7 hupe -> AUS");
-          pcf8574.digitalWrite(P7, !LOW);
-      } 
-      else { }} else { }      
 
 }
 
@@ -258,7 +172,7 @@ topic_mqtt_init();
 
  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Arduino Reset
 if ( millis()  >= 86400000) resetFunc(); // Reset alle zwei Tage
-if ( millis()  >= 30000) resetFunc(); // Reset alle zwei Tage
+//if ( millis()  >= 30000) resetFunc(); // Reset alle zwei Tage
 
 
 
