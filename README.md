@@ -1,1 +1,3 @@
 # ArduinoUNORelaisKarte
+
+init
